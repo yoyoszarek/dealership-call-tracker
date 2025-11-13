@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Daily Schedule • Hourly Team Tracker</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <span class="logo">🗓️</span>
+      <h1>Daily Schedule</h1>
+    </div>
+    <nav class="topnav">
+      <a href="index.html" class="btn small ghost">Dashboard</a>
+      <a href="schedule.html" class="btn small ghost active">Schedule</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <!-- Input Panel -->
+    <section class="panel">
+      <div class="panel-head">
+        <h3>Add to Schedule</h3>
+        <div class="actions">
+          <input id="datePicker" type="date" />
+        </div>
+      </div>
+
+      <form id="scheduleForm" class="stats-grid" autocomplete="off">
+        <article class="card">
+          <div class="card-head"><span class="icon">⏰</span><h2>Time</h2></div>
+          <input id="timeInput" type="time" class="textlike" required>
+          <small class="muted">Required (HH:MM)</small>
+        </article>
+
+        <article class="card">
+          <div class="card-head"><span class="icon">📍</span><h2>Zip Code</h2></div>
+          <input id="zipInput" type="number" inputmode="numeric" placeholder="e.g., 32205" min="0" class="textlike">
+          <small class="muted">Required only for <strong>Mobile</strong> (5 digits)</small>
+        </article>
+
+        <article class="card">
+          <div class="card-head"><span class="icon">🚗</span><h2>Mobile / Office</h2></div>
+          <div class="controls">
+            <label><input type="radio" name="mode" value="Mobile" checked> Mobile</label>
+            <label><input type="radio" name="mode" value="Office"> Office</label>
+          </div>
+          <small class="muted">Choose where this appointment happens</small>
+        </article>
+
+        <article class="card">
+          <div class="card-head"><span class="icon">👤</span><h2>Name</h2></div>
+          <input id="nameInput" type="text" placeholder="Customer or contact name" class="textlike">
+          <small class="muted">Required</small>
+        </article>
+
+        <article class="card">
+          <div class="card-head"><span class="icon">➕</span><h2>Actions</h2></div>
+          <div class="controls">
+            <button id="addEntry" class="btn primary" type="submit">Add to Schedule</button>
+            <button id="clearToday" class="btn warn" type="button">Clear Today</button>
+            <button id="exportCsv" class="btn ghost" type="button">Export CSV</button>
+          </div>
+          <small class="muted">Saved locally in this browser</small>
+        </article>
+      </form>
+    </section>
+
+    <!-- Table Panel -->
+    <section class="panel">
+      <div class="panel-head">
+        <h3>Schedule for <span id="dateLabel"></span></h3>
+      </div>
+
+      <table id="schedTable">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Time</th>
+            <th>Zip Code</th>
+            <th>Mobile/Office</th>
+            <th>Name</th>
+            <th>Added</th>
+            <th style="width:260px;"></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <small class="muted">Color key: <span class="chip chip-mobile">Mobile</span> <span class="chip chip-office">Office</span></small>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <small>Offline-ready. Data is saved to this browser with localStorage.</small>
+  </footer>
+
+  <script src="schedule.js"></script>
+</body>
+</html>
