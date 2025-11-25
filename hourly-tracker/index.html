@@ -2,53 +2,65 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <!--
+    Makes layout responsive on phones:
+    - width=device-width: match device width
+    - initial-scale=1.0: no zoom-in by default
+  -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Hourly Team Tracker</title>
 
-  <!-- Loads the main CSS file for global styling -->
+  <!-- Main stylesheet for layout, colors, fonts, etc. -->
   <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
 
-  <!-- ================================
-       APP HEADER
-       Shows app title + current date/hour
-       ================================ -->
+  <!-- ===============================
+       HEADER: App name + live date/time
+       =============================== -->
   <header class="app-header">
     <div class="brand">
-      <span class="logo">⏳</span> <!-- Small icon for branding -->
-      <h1>Hourly Team Tracker</h1> <!-- App title -->
+      <!-- Tiny logo emoji for quick visual branding -->
+      <span class="logo">⏳</span>
+      <!-- Main app title -->
+      <h1>Hourly Team Tracker</h1>
     </div>
 
-    <!-- Auto-updated date and time -->
+    <!-- Right side: current date + current time (filled by script.js) -->
     <div class="now-wrap">
-      <div id="nowDate" class="now-date"></div> <!-- Filled by script.js -->
-      <div id="nowHour" class="now-hour"></div> <!-- Filled by script.js -->
+      <!-- JS sets inner text to something like "Mon Nov 24 2025" -->
+      <div id="nowDate" class="now-date"></div>
+      <!-- JS sets inner text to something like "03:15 PM" -->
+      <div id="nowHour" class="now-hour"></div>
     </div>
   </header>
 
-  <!-- Main layout wrapper -->
+  <!-- Main content wrapper (used to center and set max width) -->
   <main class="container">
 
-    <!-- ============================================================
-         METRIC COUNTERS (Calls, Contacts, Appointments)
-         Each section has: value display + +1, -1, reset buttons
-         ============================================================ -->
+    <!-- =======================================================
+         METRIC CARDS
+         - Three cards: Calls, Contacts, Appointments
+         - Each uses data-* attributes for JS click handling
+         ======================================================= -->
     <section class="stats-grid">
+      <!--
+        stats-grid uses CSS grid or flex to display three cards
+        side-by-side on desktop and stacked on smaller screens.
+      -->
 
-      <!-- ----------------------
-           CALLS COUNTER
-           ---------------------- -->
+      <!-- ===== Calls Counter Card ===== -->
       <article class="card">
         <div class="card-head">
-          <span class="icon">📞</span> <!-- Icon for visual clarity -->
+          <!-- Icon is just visual, text is the actual label -->
+          <span class="icon">📞</span>
           <h2>Calls</h2>
         </div>
 
-        <!-- Current count displayed here -->
+        <!-- Current hour's call count (script.js updates textContent) -->
         <div class="count" id="count-calls">0</div>
 
-        <!-- Control buttons tied to script.js bump() and resetMetric() -->
+        <!-- Buttons are wired by JS via data-inc / data-dec / data-clr -->
         <div class="controls">
           <button data-inc="calls" class="btn primary">+1</button>
           <button data-dec="calls" class="btn ghost">−1</button>
@@ -56,15 +68,15 @@
         </div>
       </article>
 
-      <!-- ----------------------
-           CONTACTS COUNTER
-           ---------------------- -->
+      <!-- ===== Contacts Counter Card ===== -->
       <article class="card">
         <div class="card-head">
           <span class="icon">👥</span>
           <h2>Contacts</h2>
         </div>
+
         <div class="count" id="count-contacts">0</div>
+
         <div class="controls">
           <button data-inc="contacts" class="btn primary">+1</button>
           <button data-dec="contacts" class="btn ghost">−1</button>
@@ -72,54 +84,60 @@
         </div>
       </article>
 
-      <!-- ----------------------
-           APPOINTMENTS COUNTER
-           Retail + Buying both increment same metric
-           ---------------------- -->
+      <!-- ===== Appointments Counter Card ===== -->
       <article class="card">
         <div class="card-head">
           <span class="icon">📅</span>
           <h2>Appointments</h2>
         </div>
+
         <div class="count" id="count-appointments">0</div>
 
         <div class="controls">
+          <!-- Both buttons increment the same "appointments" metric,
+               labels are just to remind you which type you're logging. -->
           <button data-inc="appointments" class="btn primary">+1 Retail</button>
           <button data-inc="appointments" class="btn primary">+1 Buying</button>
+
           <button data-dec="appointments" class="btn ghost">−1</button>
           <button data-clr="appointments" class="btn warn small">reset</button>
         </div>
 
-        <!-- Helper note for user understanding -->
-        <small class="muted">
-          Retail & Buying both count toward Appointments total.
-        </small>
+        <!-- Small helper text under the card -->
+        <small class="muted">Retail &amp; Buying both count toward total.</small>
       </article>
     </section>
 
-    <!-- ===========================================
-         HOURLY BREAKDOWN SECTION
-         Shows stacked bar chart + table summary
-         =========================================== -->
+    <!-- =======================================================
+         TODAY'S HOURS PANEL
+         - Stacked bar chart
+         - Hourly table
+         - Control buttons (CSV, Close Hour, Save Day, Clear All)
+         ======================================================= -->
     <section class="panel">
       <div class="panel-head">
-        <h3>Today’s Hours</h3>
+        <h3>Today&apos;s Hours</h3>
 
-        <!-- Export, manual hour close, save to history, reset all -->
+        <!-- Action buttons at top right of the panel -->
         <div class="actions">
+          <!-- Export only today’s hourly breakdown as CSV -->
           <button id="exportCsv" class="btn small">Download Hourly CSV</button>
+          <!-- Force-close current hour (useful if you end early) -->
           <button id="manualHourClose" class="btn small ghost">Close Hour Now</button>
+          <!-- Save today’s totals into the history table -->
           <button id="addDayToHistory" class="btn small primary">Add Day to History</button>
+          <!-- Nuke everything (hourly, notes, schedule, history) -->
           <button id="clearAll" class="btn small warn">Clear All</button>
         </div>
       </div>
 
-      <!-- Stacked bar chart (built from JS) -->
+      <!-- Stacked bar chart container (bars built with JS) -->
       <div id="chart" class="chart"></div>
 
-      <!-- Click to toggle raw hourly data table -->
+      <!-- Collapsible table: shows hourly rows only when user wants detail -->
       <details class="table-wrap">
         <summary>Show hourly table</summary>
+
         <table id="dataTable">
           <thead>
             <tr>
@@ -130,59 +148,73 @@
               <th>Total</th>
             </tr>
           </thead>
-          <tbody></tbody> <!-- Filled dynamically -->
+          <!-- JS fills this <tbody> with one row per hour -->
+          <tbody></tbody>
         </table>
       </details>
     </section>
 
-    <!-- ===========================================
-         DAILY SCHEDULE TEXT AREA
-         Saves automatically every second
-         =========================================== -->
+    <!-- =======================================================
+         TODAY'S SCHEDULE
+         - Free text area per day
+         - Autosaved to localStorage by date
+         ======================================================= -->
     <section class="panel">
-      <h3>Today’s Schedule</h3>
-
-      <!-- Simple text area saved to localStorage -->
+      <h3>Today&apos;s Schedule</h3>
+      <!--
+        script.js:
+        - Reads from KEYS.SCHEDULE[today]
+        - Writes back every second
+      -->
       <textarea id="scheduleBox"
-        placeholder="e.g., 9–10 Team standups, 10–12 outbound calls, 1–3 appointments…">
+        placeholder="Ex: 9–10 standups, 10–12 outbound calls…">
       </textarea>
     </section>
 
-    <!-- ===========================================
-         DAILY NOTES TEXT AREA
-         Also saved every second
-         =========================================== -->
+    <!-- =======================================================
+         TODAY'S NOTES
+         - Free-form notes for the day
+         - Autosaved similar to schedule
+         ======================================================= -->
     <section class="panel">
-      <h3>Today’s Notes</h3>
+      <h3>Today&apos;s Notes</h3>
+      <!--
+        script.js:
+        - Reads from KEYS.NOTES[today]
+        - Writes back every second
+      -->
       <textarea id="notesBox"
         placeholder="Write anything you want for today…">
       </textarea>
     </section>
 
-    <!-- ===========================================
-         HISTORY (BY SAVED DAY)
-         Includes CSV export + backup/restore
-         =========================================== -->
+    <!-- =======================================================
+         HISTORY (BY DAY)
+         - Table of saved day summaries
+         - CSV export
+         - JSON backup / restore
+         ======================================================= -->
     <section class="panel">
       <div class="panel-head">
         <h3>History (by Day)</h3>
 
         <div class="actions">
-          <!-- Export full history -->
+          <!-- Export entire history table as CSV -->
           <button id="exportHistoryCsv" class="btn small">Download History CSV</button>
 
-          <!-- Backup all localStorage data to JSON -->
+          <!-- Download JSON backup of *all* data (hourly, notes, schedule, days) -->
           <button id="backupAll" class="btn small ghost">Backup (JSON)</button>
 
-          <!-- File picker for restoring JSON backups -->
+          <!-- Styled as a button, wired to the hidden file input below -->
           <label class="btn small ghost" for="restoreFile" style="cursor:pointer;">
             Restore (JSON)
           </label>
+          <!-- Hidden file input; JS listens to "change" to restore backup -->
           <input id="restoreFile" type="file" accept="application/json" style="display:none;">
         </div>
       </div>
 
-      <!-- Table listing all saved days -->
+      <!-- Table with one row per saved day (date-level summary) -->
       <table id="historyTable">
         <thead>
           <tr>
@@ -193,23 +225,32 @@
             <th>Total</th>
           </tr>
         </thead>
+        <!-- script.js fills this with rows from KEYS.DAYS map -->
         <tbody></tbody>
       </table>
 
-      <!-- Expand to show last saved day's notes & schedule -->
+      <!--
+        Expandable section showing notes & schedule
+        for the last saved day in history.
+      -->
       <details class="history-notes">
-        <summary>Show last saved day’s notes & schedule</summary>
+        <summary>Show last saved day&apos;s notes &amp; schedule</summary>
 
         <div class="history-box">
+          <!-- Updated with something like "Saved Day: 2025-11-24" -->
           <h4 id="lastDayTitle" class="muted">No day saved yet</h4>
 
+          <!-- Two columns: left = schedule, right = notes -->
           <div class="history-columns">
             <div>
               <h5>Schedule</h5>
-              <pre id="lastSchedule"></pre> <!-- Filled from saved day -->
+              <!-- Preserves formatting and line breaks from saved schedule -->
+              <pre id="lastSchedule"></pre>
             </div>
+
             <div>
               <h5>Notes</h5>
+              <!-- Preserves formatting and line breaks from saved notes -->
               <pre id="lastNotes"></pre>
             </div>
           </div>
@@ -218,12 +259,12 @@
     </section>
   </main>
 
-  <!-- Footer text -->
+  <!-- Simple footer explaining storage behavior -->
   <footer class="app-footer">
-    <small>Offline-ready. Data is saved to this browser with localStorage.</small>
+    <small>Offline-ready. Data is saved with localStorage.</small>
   </footer>
 
-  <!-- Loads all interactive logic for this page -->
+  <!-- Your JS file: handles counters, hourly data, autosave, history, backup, etc. -->
   <script src="script.js"></script>
 </body>
 </html>
