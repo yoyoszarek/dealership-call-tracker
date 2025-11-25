@@ -229,7 +229,8 @@
 
   // Initialize zip disabled state on load, based on default selected mode
   (function initZipDisabled(){
-    const mode = (els.form.querySelector('input[name="mode"]:checked") || {}).value || 'Mobile';
+    // 🔧 FIXED: removed stray quote that was breaking the script
+    const mode = (els.form.querySelector('input[name="mode"]:checked') || {}).value || 'Mobile';
     els.zip.disabled = (mode === 'Office');
   })();
 
