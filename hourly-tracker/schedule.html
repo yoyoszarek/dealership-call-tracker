@@ -2,100 +2,210 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <!-- Make layout responsive on phones/tablets -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Daily Schedule • Hourly Team Tracker</title>
+
+  <!-- Shared styling with the main dashboard -->
   <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
+  <!-- ============================
+       HEADER: Title + Top Nav
+       ============================ -->
   <header class="app-header">
     <div class="brand">
+      <!-- Different icon so it's visually distinct from main dashboard -->
       <span class="logo">🗓️</span>
       <h1>Daily Schedule</h1>
     </div>
+
+    <!-- Simple nav to jump between dashboard + schedule views -->
     <nav class="topnav">
+      <!-- Link back to main metrics dashboard -->
       <a href="index.html" class="btn small ghost">Dashboard</a>
+      <!-- Current page is "active" so you can style it differently -->
       <a href="schedule.html" class="btn small ghost active">Schedule</a>
     </nav>
   </header>
 
+  <!-- Main content area with max-width centered layout -->
   <main class="container">
-    <!-- Input Panel -->
+
+    <!-- ==========================================
+         INPUT PANEL: Add new schedule entries
+         ========================================== -->
     <section class="panel">
       <div class="panel-head">
         <h3>Add to Schedule</h3>
+
+        <!-- Date picker chooses which day's schedule we're editing -->
         <div class="actions">
+          <!-- JS initializes this to today and listens to "change" -->
           <input id="datePicker" type="date" />
         </div>
       </div>
 
+      <!--
+        Form for adding a single schedule entry.
+        JS listens to 'submit' on #scheduleForm, reads inputs, validates,
+        and saves to localStorage grouped by the selected date.
+      -->
       <form id="scheduleForm" class="stats-grid" autocomplete="off">
+        <!-- Time card -->
         <article class="card">
-          <div class="card-head"><span class="icon">⏰</span><h2>Time</h2></div>
+          <div class="card-head">
+            <span class="icon">⏰</span>
+            <h2>Time</h2>
+          </div>
+          <!-- Required time input; must be "HH:MM" -->
           <input id="timeInput" type="time" class="textlike" required>
           <small class="muted">Required (HH:MM)</small>
         </article>
 
+        <!-- Zip code card -->
         <article class="card">
-          <div class="card-head"><span class="icon">📍</span><h2>Zip Code</h2></div>
-          <input id="zipInput" type="number" inputmode="numeric" placeholder="e.g., 32205" min="0" class="textlike">
-          <small class="muted">Required only for <strong>Mobile</strong> (5 digits)</small>
+          <div class="card-head">
+            <span class="icon">📍</span>
+            <h2>Zip Code</h2>
+          </div>
+          <!-- Only required when mode = Mobile; disabled for Office in JS -->
+          <input
+            id="zipInput"
+            type="number"
+            inputmode="numeric"
+            placeholder="e.g., 32205"
+            min="0"
+            class="textlike">
+          <small class="muted">
+            Required only for <strong>Mobile</strong> (5 digits)
+          </small>
         </article>
 
+        <!-- Mode card: Mobile vs Office -->
         <article class="card">
-          <div class="card-head"><span class="icon">🚗</span><h2>Mobile / Office</h2></div>
+          <div class="card-head">
+            <span class="icon">🚗</span>
+            <h2>Mobile / Office</h2>
+          </div>
+
+          <!-- Radio buttons that set the "mode" field; JS uses them
+               both when adding new rows and when toggling zip enabled/disabled. -->
           <div class="controls">
-            <label><input type="radio" name="mode" value="Mobile" checked> Mobile</label>
-            <label><input type="radio" name="mode" value="Office"> Office</label>
+            <label>
+              <input type="radio" name="mode" value="Mobile" checked>
+              Mobile
+            </label>
+            <label>
+              <input type="radio" name="mode" value="Office">
+              Office
+            </label>
           </div>
           <small class="muted">Choose where this appointment happens</small>
         </article>
 
+        <!-- Name card -->
         <article class="card">
-          <div class="card-head"><span class="icon">👤</span><h2>Name</h2></div>
-          <input id="nameInput" type="text" placeholder="Customer or contact name" class="textlike">
+          <div class="card-head">
+            <span class="icon">👤</span>
+            <h2>Name</h2>
+          </div>
+          <!-- Customer / contact name; required in JS validation -->
+          <input
+            id="nameInput"
+            type="text"
+            placeholder="Customer or contact name"
+            class="textlike">
           <small class="muted">Required</small>
         </article>
 
+        <!-- Actions card -->
         <article class="card">
-          <div class="card-head"><span class="icon">➕</span><h2>Actions</h2></div>
-          <div class="controls">
-            <button id="addEntry" class="btn primary" type="submit">Add to Schedule</button>
-            <button id="clearToday" class="btn warn" type="button">Clear Today</button>
-            <button id="exportCsv" class="btn ghost" type="button">Export CSV</button>
+          <div class="card-head">
+            <span class="icon">➕</span>
+            <h2>Actions</h2>
           </div>
-          <small class="muted">Saved locally in this browser</small>
+
+          <!-- Main buttons for this page -->
+          <div class="controls">
+            <!-- Submits the form → JS adds new row to schedule -->
+            <button id="addEntry" class="btn primary" type="submit">
+              Add to Schedule
+            </button>
+
+            <!-- Clears all entries for the currently selected date -->
+            <button id="clearToday" class="btn warn" type="button">
+              Clear Today
+            </button>
+
+            <!-- Exports ALL dates from localStorage as schedule.csv -->
+            <button id="exportCsv" class="btn ghost" type="button">
+              Export CSV
+            </button>
+          </div>
+
+          <small class="muted">
+            Saved locally in this browser
+          </small>
         </article>
       </form>
     </section>
 
-    <!-- Table Panel -->
+    <!-- ==========================================
+         TABLE PANEL: Shows + edits schedule rows
+         ========================================== -->
     <section class="panel">
       <div class="panel-head">
+        <!-- JS updates #dateLabel to match the active date -->
         <h3>Schedule for <span id="dateLabel"></span></h3>
       </div>
 
+      <!--
+        Main schedule table:
+        - One row per appointment
+        - JS supports inline editing (time/zip/mode/name)
+        - Row color + chip style indicate Mobile vs Office
+      -->
       <table id="schedTable">
         <thead>
           <tr>
+            <!-- Simple row index -->
             <th>#</th>
+            <!-- Time of appointment -->
             <th>Time</th>
+            <!-- Zip code (blank for Office appointments) -->
             <th>Zip Code</th>
+            <!-- Tag showing Mobile or Office -->
             <th>Mobile/Office</th>
+            <!-- Person name -->
             <th>Name</th>
+            <!-- When this row was added (local time) -->
             <th>Added</th>
+            <!-- Action column (Edit / Delete / Save / Cancel) -->
             <th style="width:260px;"></th>
           </tr>
         </thead>
+        <!-- schedule.js fully manages this tbody:
+             - normal rows for view
+             - inline edit row when editing is active -->
         <tbody></tbody>
       </table>
-      <small class="muted">Color key: <span class="chip chip-mobile">Mobile</span> <span class="chip chip-office">Office</span></small>
+
+      <!-- Legend for chip styles so color meaning is obvious -->
+      <small class="muted">
+        Color key:
+        <span class="chip chip-mobile">Mobile</span>
+        <span class="chip chip-office">Office</span>
+      </small>
     </section>
   </main>
 
+  <!-- Simple footer message shared with other pages -->
   <footer class="app-footer">
     <small>Offline-ready. Data is saved to this browser with localStorage.</small>
   </footer>
 
+  <!-- Schedule-specific script: handles per-day entries, edit/delete, CSV, etc. -->
   <script src="schedule.js"></script>
 </body>
 </html>
